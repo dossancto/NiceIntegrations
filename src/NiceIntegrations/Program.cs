@@ -19,8 +19,8 @@ if (app.Environment.IsDevelopment())
 }
 
 // this tests sending email with fallback Providers
-// Send 1 to fail the first provider
-// Send 2 to fail the second provider
+// Send 1 to fail logger provider, should fallback to mailgun
+// Send 2 to fail both logger and mailgun provider
 // etc...
 app.MapGet("/send-email", async (
         [FromQuery] string error,
