@@ -16,13 +16,13 @@ public class LoggerEmailSenderAdapter(
 
     public Task<SendSimpleEmailResponse> SendSimpleEmailAsync(SendSimpleEmailRequest req, CancellationToken cancellationToken = default)
     {
-        if (req.Subject is "1")
+        if (req.Subject is "1" or "2")
         {
             throw new Exception("Fail the Logger provider");
         }
 
         _logger.LogInformation(
-            "Sending email to {Email} with subject {Subject} and message {Message}",
+            "[LOGGER] Sending email to {Email} with subject {Subject} and message {Message}",
             req.TargetEmail,
             req.Subject,
             req.Message);

@@ -1,5 +1,6 @@
 using NiceIntegrations.Modules.Commum.SubModules.EmailSenders.Adapters;
 using NiceIntegrations.Modules.Commum.SubModules.EmailSenders.Adapters.LoggerEmailSender;
+using NiceIntegrations.Modules.Commum.SubModules.EmailSenders.Adapters.MailgunIntegration;
 using NiceIntegrations.Modules.Commum.SubModules.EmailSenders.Domain.Enums;
 using NiceIntegrations.Modules.Commum.SubModules.EmailSenders.Domain.Ports;
 
@@ -42,6 +43,8 @@ public static class EmailSendersModule
 
         services.AddLoggerEmailSenderAdapter();
 
+        services.AddMailgunEmailSenderAdapter();
+
         return services;
     }
 
@@ -54,6 +57,20 @@ public static class EmailSendersModule
     {
         services.AddKeyedTransient<IEmailSenderPort, LoggerEmailSenderAdapter>(EmailSenderType.Logger.ToString());
         AvailibleEmailSenders.Add(EmailSenderType.Logger);
+        return services;
+    }
+
+    private static IServiceCollection AddMailgunEmailSenderAdapter(this IServiceCollection services)
+    {
+        services.AddHttpClient<MailGunEmailAdapter>(client =>
+        {
+            // Example of how to use the Mailgun
+            // client.BaseAddress = new Uri("https://api.mailgun.net/v3/sandbox.mailgun.org/messages");
+        });
+
+        services.AddKeyedTransient<IEmailSenderPort, MailGunEmailAdapter>(EmailSenderType.Mailgun.ToString());
+        AvailibleEmailSenders.Add(EmailSenderType.Mailgun);
+
         return services;
     }
 }
