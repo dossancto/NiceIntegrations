@@ -1,41 +1,45 @@
+using Microsoft.AspNetCore.Mvc;
+
+using NiceIntegrations.Modules.Commum;
+using NiceIntegrations.Modules.Commum.SubModules.EmailSenders.Domain.Ports;
+
 var builder = WebApplication.CreateBuilder(args);
 
-// Add services to the container.
-// Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
 builder.Services.AddOpenApi();
+
+builder.Services
+    .AddCommumModule()
+    ;
 
 var app = builder.Build();
 
-// Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {
     app.MapOpenApi();
 }
 
+// this tests sending email with fallback Providers
+// Send 1 to fail the first provider
+// Send 2 to fail the second provider
+// etc...
+app.MapGet("/send-email", async (
+        [FromQuery] string error,
+        [FromServices] IEmailSenderPort emailSender
+    ) =>
+{
+    await emailSender.SendSimpleEmailAsync(new(
+        TargetEmail: "test@test.com",
+        Subject: error,
+        Message: "This is a test email"
+    ));
+
+    return new
+    {
+        Message = "Email sent"
+    };
+
+});
+
 app.UseHttpsRedirection();
 
-var summaries = new[]
-{
-    "Freezing", "Bracing", "Chilly", "Cool", "Mild", "Warm", "Balmy", "Hot", "Sweltering", "Scorching"
-};
-
-app.MapGet("/weatherforecast", () =>
-{
-    var forecast =  Enumerable.Range(1, 5).Select(index =>
-        new WeatherForecast
-        (
-            DateOnly.FromDateTime(DateTime.Now.AddDays(index)),
-            Random.Shared.Next(-20, 55),
-            summaries[Random.Shared.Next(summaries.Length)]
-        ))
-        .ToArray();
-    return forecast;
-})
-.WithName("GetWeatherForecast");
-
 app.Run();
-
-record WeatherForecast(DateOnly Date, int TemperatureC, string? Summary)
-{
-    public int TemperatureF => 32 + (int)(TemperatureC / 0.5556);
-}
